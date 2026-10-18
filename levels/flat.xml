@@ -1,0 +1,10 @@
+<!-- Flat test ground. Levels are plain MuJoCo XML: anything inside <worldbody>
+     is copied into the scene. Special sites:
+       spawn  - where the walker starts (pos + optional yaw via euler)
+       finish - (optional) box site; reaching it ends a racecourse run -->
+<mujoco model="Flat ground">
+  <worldbody>
+    <geom name="floor" type="plane" size="0 0 0.05" material="grid"/>
+    <site name="spawn" pos="0 0 0" size="0.01" rgba="0 0 0 0"/>
+  </worldbody>
+</mujoco>
