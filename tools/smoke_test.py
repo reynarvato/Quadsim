@@ -11,6 +11,7 @@ from quadsim.app import App
 out = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else ".")
 s = qsettings.load()
 s["level"], s["mode"] = "stairs", "racecourse"
+s["window"] = [960, 540]
 qsettings.SETTINGS_PATH = out / "settings_test.json"  # don't touch the real settings
 app = App(s, headless=True)
 key = lambda k: pygame.event.Event(pygame.KEYDOWN, key=k, mod=0, unicode="", scancode=0)
@@ -20,11 +21,16 @@ app.goto("keys"); app.frame([], 1 / 60); pygame.image.save(app.screen, out / "2_
 app.goto("controller"); app.frame([], 1 / 60); pygame.image.save(app.screen, out / "3_controller.png")
 app.goto("main"); app.main_menu.sel = 0; app.frame([key(pygame.K_RETURN)], 1 / 60)
 assert app.state == "game", app.state
-# hold W by overriding key state: inject a command instead
-app.input.command = lambda: ((1.0, 0.0, 0.15), 0)
-for i in range(60 * 12):
+from quadsim.core import Controls
+# drive by overriding the input: walk, swing the turret, fire
+app.input.controls = lambda: Controls(forward=1.0, turn=0.1, pan=0.12, tilt=-0.1, fire=True)
+for i in range(60 * 2):
     app.frame([], 1 / 60)
-pygame.image.save(app.screen, out / "4_game.png")
+pygame.image.save(app.screen, out / "4_game_turretcam.png")
+app.game_event(key(pygame.K_c))  # -> chase cam
+for i in range(30):
+    app.frame([], 1 / 60)
+pygame.image.save(app.screen, out / "4b_game_chase.png")
 app.frame([key(pygame.K_ESCAPE)], 1 / 60)
 assert app.state == "pause"
 pygame.image.save(app.screen, out / "5_pause.png")

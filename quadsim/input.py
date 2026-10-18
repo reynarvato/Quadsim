@@ -13,6 +13,8 @@ os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
 
 import pygame  # noqa: E402
 
+from .core import Controls  # noqa: E402
+
 
 def key_code(name: str):
     try:
@@ -88,12 +90,18 @@ class InputManager:
         """True if this event is the key or button bound to a one-shot action."""
         return self.is_key(ev, action) or self.is_button(ev, action)
 
-    def command(self):
-        """(forward, left, turn_left) in [-1, 1] plus height direction in {-1, 0, 1}."""
+    def controls(self) -> Controls:
+        """Combine joystick axes, buttons and keys into one Controls frame."""
         kh = self.key_held
-        fwd = self.axis_value("forward") + kh("forward") - kh("back")
-        left = self.axis_value("strafe") + kh("strafe_left") - kh("strafe_right")
-        turn = self.axis_value("turn") + kh("turn_left") - kh("turn_right")
         clamp = lambda v: max(-1.0, min(1.0, v))  # noqa: E731
-        h = (kh("height_up") or self.button_held("height_up")) - (kh("height_down") or self.button_held("height_down"))
-        return (clamp(fwd), clamp(left), clamp(turn)), h
+        return Controls(
+            forward=clamp(self.axis_value("forward") + kh("forward") - kh("back")),
+            strafe=clamp(self.axis_value("strafe") + kh("strafe_left") - kh("strafe_right")),
+            turn=clamp(self.axis_value("turn") + kh("turn_left") - kh("turn_right")),
+            height=float((kh("height_up") or self.button_held("height_up"))
+                         - (kh("height_down") or self.button_held("height_down"))),
+            pan=clamp(self.axis_value("turret_pan") + kh("turret_left") - kh("turret_right")),
+            tilt=clamp(self.axis_value("turret_tilt") + kh("turret_up") - kh("turret_down"))
+            * (-1.0 if self.settings.get("flip_tilt") else 1.0),
+            fire=kh("fire") or self.button_held("fire"),
+        )

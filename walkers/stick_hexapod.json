@@ -1,16 +1,25 @@
 {
   "name": "Stick hexapod",
-  "description": "Default 18-DOF stick-figure hexapod (3 joints per leg).",
-
-  "chassis_half_size_m": [0.13, 0.095, 0.035],
+  "description": "Default 18-DOF stick-figure hexapod (3 joints per leg) with a 2-DOF BB turret.",
+  "chassis_half_size_m": [
+    0.13,
+    0.095,
+    0.035
+  ],
   "chassis_mass_kg": 0.35,
-
   "electronics_box": {
-    "size_mm": [150, 150, 60],
-    "offset_mm": [0, 0, 0],
+    "size_mm": [
+      150,
+      150,
+      60
+    ],
+    "offset_mm": [
+      0,
+      0,
+      0
+    ],
     "mass_kg": 0.6
   },
-
   "legs": {
     "coxa_m": 0.045,
     "femur_m": 0.08,
@@ -18,33 +27,141 @@
     "foot_radius_m": 0.012,
     "segment_mass_kg": 0.04,
     "mounts": [
-      {"name": "L1", "pos_m": [ 0.12,  0.085], "yaw_deg":  45},
-      {"name": "L2", "pos_m": [ 0.00,  0.100], "yaw_deg":  90},
-      {"name": "L3", "pos_m": [-0.12,  0.085], "yaw_deg": 135},
-      {"name": "R1", "pos_m": [ 0.12, -0.085], "yaw_deg": -45},
-      {"name": "R2", "pos_m": [ 0.00, -0.100], "yaw_deg": -90},
-      {"name": "R3", "pos_m": [-0.12, -0.085], "yaw_deg":-135}
+      {
+        "name": "L1",
+        "pos_m": [
+          0.12,
+          0.085
+        ],
+        "yaw_deg": 45
+      },
+      {
+        "name": "L2",
+        "pos_m": [
+          0.0,
+          0.1
+        ],
+        "yaw_deg": 90
+      },
+      {
+        "name": "L3",
+        "pos_m": [
+          -0.12,
+          0.085
+        ],
+        "yaw_deg": 135
+      },
+      {
+        "name": "R1",
+        "pos_m": [
+          0.12,
+          -0.085
+        ],
+        "yaw_deg": -45
+      },
+      {
+        "name": "R2",
+        "pos_m": [
+          0.0,
+          -0.1
+        ],
+        "yaw_deg": -90
+      },
+      {
+        "name": "R3",
+        "pos_m": [
+          -0.12,
+          -0.085
+        ],
+        "yaw_deg": -135
+      }
     ]
   },
-
   "servo": {
-    "kp": 25.0,
-    "damping": 0.4,
-    "max_torque_nm": 2.4
+    "kp": 60.0,
+    "damping": 0.8,
+    "max_torque_nm": 2.4,
+    "max_speed_dps": 600
   },
-
   "stance": {
-    "foot_reach_m": 0.10,
-    "body_height_m": 0.10
+    "foot_reach_m": 0.1,
+    "body_height_m": 0.1
   },
-
   "gait": {
-    "type": "wave",
-    "order": ["R3", "R2", "R1", "L3", "L2", "L1"],
-    "cycle_s": 1.2,
-    "swing_height_m": 0.045,
-    "max_stride_m": 0.08,
-    "max_speed_mps": 0.08,
-    "max_yaw_rate_rps": 0.5
+    "default": "tripod",
+    "max_stride_m": 0.1,
+    "response_s": 0.06,
+    "types": {
+      "tripod": {
+        "label": "Tripod (fast)",
+        "cycle_s": 0.32,
+        "duty": 0.5,
+        "swing_height_m": 0.05,
+        "offsets": {
+          "L1": 0.0,
+          "R2": 0.0,
+          "L3": 0.0,
+          "R1": 0.5,
+          "L2": 0.5,
+          "R3": 0.5
+        }
+      },
+      "ripple": {
+        "label": "Ripple",
+        "cycle_s": 0.45,
+        "duty": 0.6667,
+        "swing_height_m": 0.05,
+        "offsets": {
+          "L3": 0.0,
+          "R1": 0.1667,
+          "L2": 0.3333,
+          "R3": 0.5,
+          "L1": 0.6667,
+          "R2": 0.8333
+        }
+      },
+      "wave": {
+        "label": "Wave (stable)",
+        "cycle_s": 0.6,
+        "duty": 0.8333,
+        "swing_height_m": 0.05,
+        "offsets": {
+          "R3": 0.0,
+          "R2": 0.1667,
+          "R1": 0.3333,
+          "L3": 0.5,
+          "L2": 0.6667,
+          "L1": 0.8333
+        }
+      }
+    }
+  },
+  "turret": {
+    "enabled": true,
+    "mount_mm": [
+      10,
+      0
+    ],
+    "pan_range_deg": [
+      -170,
+      170
+    ],
+    "tilt_range_deg": [
+      -20,
+      60
+    ],
+    "pan_rate_dps": 220,
+    "tilt_rate_dps": 140,
+    "barrel_mm": 120,
+    "mass_kg": 0.15,
+    "servo_kp": 10.0,
+    "servo_max_torque_nm": 1.5,
+    "bb": {
+      "diameter_mm": 6,
+      "mass_g": 0.2,
+      "muzzle_speed_mps": 45,
+      "fire_rate_hz": 8,
+      "drag_cd": 0.47
+    }
   }
 }

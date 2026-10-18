@@ -3,5 +3,5 @@ __pycache__/
 *.pyc
 config/settings.json
 *.mp4
-*.png
+/*.png
 *.tgz

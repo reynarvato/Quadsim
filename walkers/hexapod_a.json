@@ -1,0 +1,176 @@
+{
+  "name": "Hexapod A",
+  "description": "Round-body hexapod with lattice scythe legs, loaded from hexapod_a.urdf.",
+  "urdf": "hexapod_a.urdf",
+  "chassis_half_size_m": [
+    0.112,
+    0.112,
+    0.036000000000000004
+  ],
+  "electronics_box": {
+    "size_mm": [
+      150,
+      150,
+      60
+    ],
+    "offset_mm": [
+      0,
+      0,
+      0
+    ],
+    "mass_kg": 0.6
+  },
+  "legs": {
+    "coxa_m": 0.052,
+    "femur_m": 0.088,
+    "tibia_m": 0.165,
+    "foot_radius_m": 0.007,
+    "mounts": [
+      {
+        "name": "R1",
+        "pos_m": [
+          0.10566,
+          -0.061
+        ],
+        "yaw_deg": -30
+      },
+      {
+        "name": "R2",
+        "pos_m": [
+          0.0,
+          -0.122
+        ],
+        "yaw_deg": -90
+      },
+      {
+        "name": "R3",
+        "pos_m": [
+          -0.10566,
+          -0.061
+        ],
+        "yaw_deg": -150
+      },
+      {
+        "name": "L1",
+        "pos_m": [
+          0.10566,
+          0.061
+        ],
+        "yaw_deg": 30
+      },
+      {
+        "name": "L2",
+        "pos_m": [
+          0.0,
+          0.122
+        ],
+        "yaw_deg": 90
+      },
+      {
+        "name": "L3",
+        "pos_m": [
+          -0.10566,
+          0.061
+        ],
+        "yaw_deg": 150
+      }
+    ]
+  },
+  "servo": {
+    "kp": 60.0,
+    "damping": 0.8,
+    "max_torque_nm": 2.4,
+    "max_speed_dps": 600
+  },
+  "stance": {
+    "foot_reach_m": 0.105,
+    "body_height_m": 0.12
+  },
+  "gait": {
+    "default": "tripod",
+    "max_stride_m": 0.14,
+    "response_s": 0.06,
+    "types": {
+      "tripod": {
+        "label": "Tripod (fast)",
+        "cycle_s": 0.32,
+        "duty": 0.5,
+        "swing_height_m": 0.05,
+        "offsets": {
+          "L1": 0.0,
+          "R2": 0.0,
+          "L3": 0.0,
+          "R1": 0.5,
+          "L2": 0.5,
+          "R3": 0.5
+        }
+      },
+      "ripple": {
+        "label": "Ripple",
+        "cycle_s": 0.45,
+        "duty": 0.6667,
+        "swing_height_m": 0.05,
+        "offsets": {
+          "L3": 0.0,
+          "R1": 0.1667,
+          "L2": 0.3333,
+          "R3": 0.5,
+          "L1": 0.6667,
+          "R2": 0.8333
+        }
+      },
+      "wave": {
+        "label": "Wave (stable)",
+        "cycle_s": 0.6,
+        "duty": 0.8333,
+        "swing_height_m": 0.05,
+        "offsets": {
+          "R3": 0.0,
+          "R2": 0.1667,
+          "R1": 0.3333,
+          "L3": 0.5,
+          "L2": 0.6667,
+          "L1": 0.8333
+        }
+      }
+    }
+  },
+  "turret": {
+    "enabled": true,
+    "mount_mm": [
+      -45,
+      0
+    ],
+    "pan_range_deg": [
+      -170,
+      170
+    ],
+    "tilt_range_deg": [
+      -20,
+      60
+    ],
+    "pan_rate_dps": 220,
+    "tilt_rate_dps": 140,
+    "barrel_mm": 120,
+    "mass_kg": 0.15,
+    "servo_kp": 10.0,
+    "servo_max_torque_nm": 1.5,
+    "bb": {
+      "diameter_mm": 6,
+      "mass_g": 0.2,
+      "muzzle_speed_mps": 45,
+      "fire_rate_hz": 8,
+      "drag_cd": 0.47
+    }
+  },
+  "sites": {
+    "muzzle": {
+      "body": "turret_tilt",
+      "pos": [
+        0.132,
+        0,
+        0
+      ]
+    }
+  }
+}

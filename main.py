@@ -16,21 +16,24 @@ def run_viewer():
     import mujoco.viewer
     from quadsim import input as qinput
     import pygame
-    from quadsim.core import SimSession
+    from quadsim.core import SimSession, add_overlay
     from quadsim.robot import load_walker
 
     s = qsettings.load()
     pygame.display.init()
     pygame.joystick.init()
     inp = qinput.InputManager(s)
-    sess = SimSession(load_walker(s["walker"]), s["level"])
-    flags = {"reset": False}
+    sess = SimSession(load_walker(s["walker"]), s["level"], speed_mult=s["speed_mult"],
+                      turret_sens=tuple(s["turret_sens"]), stride_mult=s["stride_mult"])
+    flags = {"reset": False, "gait": False}
 
-    def on_key(keycode):  # GLFW keycodes; 259 = backspace
+    def on_key(keycode):  # GLFW keycodes; 259 = backspace, 71 = G
         if keycode == 259:
             flags["reset"] = True
+        elif keycode == 71:
+            flags["gait"] = True
 
-    print(f"Controller: {inp.joy_name}. Backspace in the viewer resets. Close the window to quit.")
+    print(f"Controller: {inp.joy_name}. Backspace resets, G changes gait. Close the window to quit.")
     with mujoco.viewer.launch_passive(sess.model, sess.data, key_callback=on_key) as v:
         last = time.perf_counter()
         while v.is_running():
@@ -41,9 +44,14 @@ def run_viewer():
             if flags["reset"]:
                 sess.reset()
                 flags["reset"] = False
-            (cmd, h) = inp.command()
+            if flags["gait"]:
+                sess.cycle_gait()
+                flags["gait"] = False
+                print("gait:", sess.gait.label)
             with v.lock():
-                sess.step(dt, cmd, height_rate=0.04 * h)
+                sess.step(dt, inp.controls())
+                v.user_scn.ngeom = 0
+                add_overlay(v.user_scn, sess)
             v.sync()
             time.sleep(max(0.0, 1 / 60 - (time.perf_counter() - now)))
 

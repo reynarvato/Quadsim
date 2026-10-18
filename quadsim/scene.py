@@ -30,10 +30,12 @@ SCENE_TEMPLATE = """
     <material name="stairs" rgba="0.55 0.5 0.42 1"/>
     <material name="platform" rgba="0.45 0.42 0.36 1"/>
     <material name="chassis" rgba="0.85 0.86 0.88 0.55"/>
-    <material name="electronics" rgba="0.15 0.55 0.95 0.55"/>
+    <material name="electronics" rgba="0.15 0.55 0.95 0.3"/>
     <material name="leg" rgba="0.92 0.55 0.15 1"/>
     <material name="foot" rgba="0.1 0.1 0.1 1"/>
     <material name="accent" rgba="0.95 0.2 0.2 1"/>
+    <material name="turret" rgba="0.3 0.32 0.36 1"/>
+    <material name="barrel" rgba="0.12 0.12 0.14 1"/>
   </asset>
   <worldbody>
     <light name="sun" pos="0 0 3" dir="0.3 0.2 -1" directional="true" castshadow="true" diffuse="0.6 0.6 0.6"/>
@@ -54,6 +56,19 @@ def list_levels() -> dict[str, str]:
     return out
 
 
+def level_flags(level_root) -> dict:
+    """Optional switches stored as <custom><numeric name="quadsim_..." data="1"/></custom> in a level."""
+    out = {}
+    custom = level_root.find("custom")
+    if custom is not None:
+        for n in custom.findall("numeric"):
+            try:
+                out[n.get("name")] = float(n.get("data", "0").split()[0])
+            except ValueError:
+                pass
+    return out
+
+
 def level_has_finish(level_key: str) -> bool:
     root = ET.parse(LEVEL_DIR / f"{level_key}.xml").getroot()
     return any(s.get("name") == "finish" for s in root.iter("site"))
@@ -63,20 +78,35 @@ def build_model(walker: Walker, level_key: str) -> mujoco.MjModel:
     scene = ET.fromstring(SCENE_TEMPLATE)
     world = scene.find("worldbody")
     level = ET.parse(LEVEL_DIR / f"{level_key}.xml").getroot()
+    flags = level_flags(level)
+    if flags.get("quadsim_no_sun"):      # indoor level brings its own lights
+        for light in world.findall("light"):
+            world.remove(light)
+    if flags.get("quadsim_no_skybox"):   # void around a floating level (the level may add its own sky)
+        asset = scene.find("asset")
+        for t in asset.findall("texture"):
+            if t.get("type") == "skybox":
+                asset.remove(t)
 
     for section in ("asset", "default"):
         src = level.find(section)
         if src is not None:
             dst = scene.find(section)
             for child in src:
+                f = child.get("file")
+                if f and not Path(f).is_absolute():   # textures / meshes: paths relative to levels/
+                    child.set("file", str((LEVEL_DIR / f).resolve()))
                 dst.append(child)
     lw = level.find("worldbody")
     if lw is not None:
         for child in lw:
             world.append(child)
 
-    body_xml, act_xml = walker.to_mjcf_body()
-    world.append(ET.fromstring(body_xml))
+    body_xml, act_xml, assets = walker.to_mjcf_body()
+    for el in assets:
+        scene.find("asset").append(el)
+    # the robot goes FIRST so its free joint is qpos[0:7] / qvel[0:6] even when the level has loose props
+    world.insert(0, ET.fromstring(body_xml))
     act = scene.find("actuator")
     for el in ET.fromstring(f"<a>{act_xml}</a>"):
         act.append(el)
